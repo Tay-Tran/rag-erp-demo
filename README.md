@@ -1,0 +1,87 @@
+# rag-erp-demo
+
+Demo trợ lý AI cho tài liệu nội bộ kiểu ERP: **hỏi đáp quy trình có trích dẫn**, **trích xuất và kiểm tra báo giá**, và **bộ đo độ chính xác** chạy lại được sau mỗi lần đổi prompt hay cấu hình.
+
+Python · LlamaIndex · Qdrant · FastEmbed · Claude API (Anthropic SDK) · Pydantic · pytest
+
+> Dữ liệu trong `data/` là của một công ty truyền thông **giả lập** (Công ty CP Truyền thông Sao Việt), tự soạn để demo: 6 tài liệu quy trình và 2 báo giá.
+
+## Chạy thử
+
+```bash
+python -m venv .venv
+.venv/Scripts/activate          # Windows; macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # điền ANTHROPIC_API_KEY
+
+python -m rag_erp ingest                                   # nạp tài liệu vào Qdrant
+python -m rag_erp ask "Muốn chiết khấu 20% cho khách thì cần ai duyệt?"
+python -m rag_erp extract BG-2026-0157.txt                 # trích xuất + kiểm tra báo giá
+python -m rag_erp eval                                     # bộ đo đầy đủ
+python -m rag_erp eval --retrieval-only                    # chỉ đo bước tìm kiếm, không tốn tiền
+pytest                                                     # 14 unit test, không gọi API
+```
+
+## Cách hoạt động
+
+```mermaid
+flowchart LR
+  D[Tài liệu .md] --> P[LlamaIndex<br/>chia theo đề mục, rồi theo câu]
+  P --> E[FastEmbed<br/>vector đa ngôn ngữ + BM25]
+  E --> Q[(Qdrant<br/>chạy dạng tệp)]
+  U[Câu hỏi] --> R[Tìm kiếm kết hợp<br/>vector + từ khóa]
+  Q --> R
+  R --> C[Claude<br/>mỗi đoạn là một document bật citations]
+  C --> A[Trả lời + trích dẫn đoạn nguồn<br/>hoặc từ chối nếu tài liệu không có]
+  V[Báo giá .txt] --> X[Claude structured output<br/>theo schema Pydantic]
+  X --> K[Kiểm tra bằng Python<br/>phép tính, bảng giá, bậc chiết khấu, quyền duyệt]
+```
+
+| Phần | Tệp | Ghi chú |
+| --- | --- | --- |
+| Nạp tài liệu | `rag_erp/ingest.py` | `MarkdownNodeParser` giữ đường dẫn đề mục để trích dẫn ghi được "tài liệu › mục"; `SentenceSplitter` cắt đoạn dài |
+| Kho vector | `rag_erp/store.py` | Qdrant chế độ tệp (không cần Docker); embedding `paraphrase-multilingual-MiniLM-L12-v2` chạy trên máy, thêm BM25 cho tìm kiếm kết hợp |
+| Hỏi đáp | `rag_erp/ask.py` | Dùng tính năng citations của Claude, nên trích dẫn trỏ đúng đoạn văn nguồn thay vì để model tự ghi tên tài liệu |
+| Trích xuất | `rag_erp/extract.py`, `schema.py` | `messages.parse` với schema Pydantic; model chép đúng số trên chứng từ, kể cả số sai |
+| Kiểm tra chứng từ | `rag_erp/checks.py` | Mọi phép tính và đối chiếu quy định làm bằng Python, không để LLM tính, nên lặp lại được và có unit test |
+| Prompt có phiên bản | `rag_erp/prompts.py` | Mỗi prompt có mã phiên bản; mã này đi vào nhật ký chi phí và kết quả đo |
+| Chi phí, độ trễ | `rag_erp/usage.py` | Mỗi lần gọi ghi token, chi phí USD và độ trễ vào `storage/usage.jsonl` |
+| Bộ đo | `rag_erp/evaluate.py`, `data/eval/` | 19 câu trong phạm vi + 2 câu ngoài tài liệu; 2 báo giá có đáp án từng trường và danh sách lỗi cần bắt |
+
+## Kết quả đo
+
+**Bước tìm kiếm** (19 câu hỏi có đáp án nguồn, chạy `eval --retrieval-only`):
+
+| Cấu hình | Tìm đúng tài liệu nguồn |
+| --- | --- |
+| Chỉ vector, top-3 | 17/19 |
+| Chỉ vector, top-4 | 17/19 |
+| Chỉ vector, top-5 | 18/19 |
+| Vector + BM25, top-3 | 19/19 |
+| Vector + BM25, top-4 (mặc định) | 19/19 |
+
+Khi chỉ dùng vector, hai câu trượt:
+- "Muốn chiết khấu 20% cho khách thì cần ai duyệt?" bị kéo về quy trình duyệt mua hàng.
+- Câu hỏi ghép chiết khấu với đặt cọc chỉ tìm được tài liệu hợp đồng.
+
+Thêm BM25 thì bắt được từ khóa "chiết khấu", nên tìm đủ cả hai.
+
+**Hỏi đáp và trích xuất:** xem `results/latest.md` sau khi chạy `python -m rag_erp eval`.
+
+## Kiểm tra báo giá bắt được gì
+
+`BG-2026-0157.txt` được soạn sẵn với ba lỗi; bộ kiểm tra phải bắt đủ cả ba:
+
+- Dòng 2: 240 × 1.000.000 đ = 240.000.000 đ, chứng từ ghi 204.000.000 đ.
+- Hợp đồng 8 tuần có chiết khấu chuẩn 5%, báo giá ghi 20%.
+- Chiết khấu 20% phải được Trưởng phòng Kinh doanh duyệt trên ERP, chứng từ ghi "chưa duyệt".
+
+## Giới hạn
+
+- Dữ liệu nhỏ (6 tài liệu, 29 đoạn); với kho lớn cần Qdrant máy chủ, lọc theo metadata (phòng ban, quyền xem) và bộ đo lớn hơn.
+- Chứng từ đầu vào là văn bản; ảnh hoặc PDF scan cần thêm bước OCR, hoặc gửi thẳng ảnh/PDF cho Claude.
+- Chấm câu trả lời bằng từ khóa bắt buộc; bộ đo lớn hơn nên thêm chấm bằng LLM có đối chiếu với người chấm.
+
+## Tác giả
+
+Trần Ngọc Tây — [github.com/Tay-Tran](https://github.com/Tay-Tran) · [opener.com.vn](https://opener.com.vn). Mã viết cùng Claude Code; mình thiết kế, soát và kiểm chứng.

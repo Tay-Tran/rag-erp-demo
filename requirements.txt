@@ -1,0 +1,9 @@
+anthropic==2.12.0
+llama-index-core==0.14.26
+llama-index-embeddings-fastembed==0.8.0
+llama-index-vector-stores-qdrant==0.11.0
+qdrant-client==1.20.0
+fastembed==0.9.1
+pydantic==2.14.4
+python-dotenv==1.2.4
+pytest==9.2.0

@@ -1,0 +1,23 @@
+[
+  {"id": "mua-01", "question": "Đơn mua hàng 80 triệu đồng cần lấy bao nhiêu báo giá?", "sources": ["quy-trinh-mua-hang.md"], "must_include": [["3", "ba"]]},
+  {"id": "mua-02", "question": "Đơn mua hàng 150 triệu đồng trước VAT thì ai duyệt?", "sources": ["quy-trinh-mua-hang.md"], "must_include": [["giám đốc tài chính"]]},
+  {"id": "mua-03", "question": "Kế toán thanh toán cho nhà cung cấp trong bao lâu?", "sources": ["quy-trinh-mua-hang.md"], "must_include": [["30 ngày"]]},
+  {"id": "mua-04", "question": "Được tạm ứng cho nhà cung cấp tối đa bao nhiêu phần trăm giá trị PO?", "sources": ["quy-trinh-mua-hang.md"], "must_include": [["30%"]]},
+  {"id": "ctp-01", "question": "Đi công tác Đà Nẵng thì tiền khách sạn được thanh toán tối đa bao nhiêu một đêm?", "sources": ["quy-dinh-cong-tac-phi.md"], "must_include": [["800.000", "800 nghìn", "800k"]]},
+  {"id": "ctp-02", "question": "Phụ cấp lưu trú khi đi công tác ngoại tỉnh là bao nhiêu?", "sources": ["quy-dinh-cong-tac-phi.md"], "must_include": [["300.000", "300 nghìn", "300k"]]},
+  {"id": "ctp-03", "question": "Sau chuyến công tác phải quyết toán trong bao lâu?", "sources": ["quy-dinh-cong-tac-phi.md"], "must_include": [["7 ngày"]]},
+  {"id": "bg-01", "question": "Giá một spot 30 giây ở vị trí hạng B là bao nhiêu?", "sources": ["quy-trinh-bao-gia-quang-cao.md"], "must_include": [["1.900.000", "1,9 triệu"]]},
+  {"id": "bg-02", "question": "Hợp đồng quảng cáo 26 tuần được chiết khấu bao nhiêu?", "sources": ["quy-trinh-bao-gia-quang-cao.md"], "must_include": [["15%"]]},
+  {"id": "bg-03", "question": "Muốn chiết khấu 20% cho khách thì cần ai duyệt?", "sources": ["quy-trinh-bao-gia-quang-cao.md"], "must_include": [["trưởng phòng kinh doanh"]]},
+  {"id": "bg-04", "question": "Báo giá quảng cáo có hiệu lực bao lâu?", "sources": ["quy-trinh-bao-gia-quang-cao.md"], "must_include": [["15 ngày"]]},
+  {"id": "hd-01", "question": "Khách hàng phải đặt cọc bao nhiêu phần trăm giá trị hợp đồng?", "sources": ["quy-trinh-ky-hop-dong.md"], "must_include": [["30%"]]},
+  {"id": "hd-02", "question": "Khách hàng chậm thanh toán thì bị phạt thế nào?", "sources": ["quy-trinh-ky-hop-dong.md"], "must_include": [["0,05%", "0.05%"]]},
+  {"id": "hd-03", "question": "Muốn chấm dứt hợp đồng trước hạn phải báo trước bao lâu?", "sources": ["quy-trinh-ky-hop-dong.md"], "must_include": [["15 ngày"]]},
+  {"id": "np-01", "question": "Một năm nhân viên có bao nhiêu ngày phép?", "sources": ["quy-dinh-nghi-phep.md"], "must_include": [["12"]]},
+  {"id": "np-02", "question": "Muốn nghỉ phép 4 ngày thì phải đăng ký trước bao lâu?", "sources": ["quy-dinh-nghi-phep.md"], "must_include": [["7 ngày"]]},
+  {"id": "sc-01", "question": "Màn hình quảng cáo bị tắt thì phải khắc phục trong bao lâu?", "sources": ["xu-ly-su-co-man-hinh.md"], "must_include": [["4 giờ"]]},
+  {"id": "sc-02", "question": "Quảng cáo của khách bị gián đoạn do lỗi công ty thì xử lý thế nào?", "sources": ["xu-ly-su-co-man-hinh.md"], "must_include": [["1,5", "1.5"]]},
+  {"id": "ghep-01", "question": "Khách ký hợp đồng 12 tuần thì được chiết khấu bao nhiêu và phải đặt cọc bao nhiêu?", "sources": ["quy-trinh-bao-gia-quang-cao.md", "quy-trinh-ky-hop-dong.md"], "must_include": [["10%"], ["30%"]]},
+  {"id": "ngoai-01", "question": "Công ty có cho nhân viên làm việc từ xa không?", "sources": [], "expect_refusal": true},
+  {"id": "ngoai-02", "question": "Lương tháng 13 được tính như thế nào?", "sources": [], "expect_refusal": true}
+]

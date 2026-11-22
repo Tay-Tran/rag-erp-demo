@@ -1,0 +1,34 @@
+[
+  {
+    "file": "BG-2026-0142.txt",
+    "expected": {
+      "so_bao_gia": "BG-2026-0142",
+      "ngay_lap": "2026-11-03",
+      "khach_hang": "Công ty TNHH Cà phê Hạt Mộc",
+      "ma_so_thue": "0312345678",
+      "so_dong": 2,
+      "tam_tinh": 480000000,
+      "chiet_khau_phan_tram": 10,
+      "chiet_khau": 48000000,
+      "vat": 43200000,
+      "tong_cong": 475200000
+    },
+    "expected_issues": []
+  },
+  {
+    "file": "BG-2026-0157.txt",
+    "expected": {
+      "so_bao_gia": "BG-2026-0157",
+      "ngay_lap": "2026-11-10",
+      "khach_hang": "Công ty CP Thời trang Lam",
+      "ma_so_thue": "0109876543",
+      "so_dong": 2,
+      "tam_tinh": 332000000,
+      "chiet_khau_phan_tram": 20,
+      "chiet_khau": 66400000,
+      "vat": 26560000,
+      "tong_cong": 292160000
+    },
+    "expected_issues": ["thanh_tien_dong_2", "chiet_khau_vuot_bac", "chiet_khau_chua_duyet"]
+  }
+]

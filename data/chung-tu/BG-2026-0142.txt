@@ -1,0 +1,22 @@
+CÔNG TY CP TRUYỀN THÔNG SAO VIỆT (công ty giả lập dùng cho demo)
+BÁO GIÁ QUẢNG CÁO MÀN HÌNH
+
+Số: BG-2026-0142                         Ngày lập: 03/11/2026
+Kính gửi: Công ty TNHH Cà phê Hạt Mộc (khách hàng giả lập)
+Mã số thuế: 0312345678
+Thời gian phát sóng dự kiến: 12 tuần, từ 01/12/2026
+
+STT | Nội dung                                   | Hạng | Spot | Số MH | Số tuần | SL (MH-tuần) | Đơn giá (đ)  | Thành tiền (đ)
+1   | Quảng cáo sảnh văn phòng, Quận 1           | A    | 15s  | 10    | 12      | 120          | 1.800.000    | 216.000.000
+2   | Quảng cáo chung cư khu Thủ Đức             | B    | 15s  | 20    | 12      | 240          | 1.100.000    | 264.000.000
+
+Tạm tính:                                  480.000.000
+Chiết khấu 10% (hợp đồng 12 tuần):          48.000.000
+Thành tiền sau chiết khấu:                 432.000.000
+VAT 10%:                                    43.200.000
+TỔNG CỘNG:                                 475.200.000
+
+Bằng chữ: Bốn trăm bảy mươi lăm triệu hai trăm nghìn đồng.
+Báo giá có hiệu lực 15 ngày kể từ ngày lập.
+Duyệt chiết khấu: không cần (chiết khấu không quá 15%).
+Nhân viên kinh doanh: Nguyễn Văn A (tên giả lập)
