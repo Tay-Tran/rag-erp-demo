@@ -8,18 +8,30 @@ Python · LlamaIndex · Qdrant · FastEmbed · Claude API (Anthropic SDK) · Pyd
 
 ## Chạy thử
 
-```bash
-python -m venv .venv
-.venv/Scripts/activate          # Windows; macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env            # điền ANTHROPIC_API_KEY
+Cần Python 3.12. Trên Windows nên clone vào một thư mục ngắn, ví dụ `C:\rag-erp-demo`: thư viện Anthropic có tệp tên rất dài, nên nếu đường dẫn quá dài thì Windows báo lỗi lúc cài, trừ khi đã bật Long Path.
 
+Windows (PowerShell):
+
+```powershell
+git clone https://github.com/Tay-Tran/rag-erp-demo C:\rag-erp-demo
+cd C:\rag-erp-demo
+python -m venv .venv
+.venv\Scripts\Activate.ps1      # nếu bị chặn: Set-ExecutionPolicy -Scope Process Bypass
+pip install -r requirements.txt
+copy .env.example .env          # điền ANTHROPIC_API_KEY; bỏ trống thì chạy chế độ phát lại
+```
+
+Lần chạy `ingest` đầu tiên tải model embedding (khoảng 300 MB) nên mất vài phút; các lần sau chạy ngay.
+
+macOS/Linux thay hai dòng kích hoạt và chép tệp bằng `source .venv/bin/activate` và `cp .env.example .env`. Sau đó:
+
+```bash
 python -m rag_erp ingest                                   # nạp tài liệu vào Qdrant
 python -m rag_erp ask "Muốn chiết khấu 20% cho khách thì cần ai duyệt?"
 python -m rag_erp extract BG-2026-0157.txt                 # trích xuất + kiểm tra báo giá
 python -m rag_erp eval                                     # bộ đo đầy đủ
 python -m rag_erp eval --retrieval-only                    # chỉ đo bước tìm kiếm, không tốn tiền
-pytest                                                     # 20 unit test, không gọi API
+pytest                                                     # 21 unit test, không gọi API
 ```
 
 ## Chạy thử khi không có khóa API
@@ -36,6 +48,7 @@ Không có khóa API của Claude vẫn chạy được demo, nhưng màn hình 
 - Bản ghi chỉ được phát lại khi câu hỏi, các đoạn tài liệu tìm được, prompt và model giống hệt lúc ghi; khác một chữ là không phát lại. Vì vậy demo không bao giờ đưa câu trả lời của câu này cho câu khác.
 - Câu chưa có bản ghi thì demo báo "Chưa có câu trả lời ghi sẵn cho câu hỏi này", liệt kê các câu đã có bản ghi để thử, và vẫn cho xem các đoạn tài liệu tìm được.
 - Kết quả phát lại luôn mở đầu bằng dòng "LƯU Ý: Đây là câu trả lời đã ghi lại từ một lần chạy thật với Claude … ngày …". Chi phí và độ trễ hiện ra là số của lần chạy thật lúc ghi.
+- Hiện repo **chưa có bản ghi nào** (chưa chạy với khóa API lần nào), nên khi không có khóa chỉ chạy được phần tìm tài liệu, bộ đo tìm kiếm và unit test.
 - Muốn ép một chế độ: `RAG_MODE=live` (luôn gọi Claude) hoặc `RAG_MODE=replay` (luôn phát lại).
 
 ## Cách hoạt động

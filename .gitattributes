@@ -1,0 +1,2 @@
+# Giữ kiểu xuống dòng LF cho mọi tệp văn bản, kể cả khi clone trên Windows.
+* text=auto eol=lf

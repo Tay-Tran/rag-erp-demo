@@ -39,8 +39,9 @@ class Answer:
 
 def _section(node) -> str:
     """Đường dẫn đề mục: các đề mục cha (header_path của LlamaIndex) cộng đề mục của chính đoạn."""
-    parts = [p for p in (node.metadata.get("header_path") or "").split("/") if p]
-    first = node.get_content().lstrip().splitlines()[0] if node.get_content().strip() else ""
+    # strip(): tệp tài liệu có thể mang \r\n khi git trên Windows đổi kiểu xuống dòng lúc clone.
+    parts = [p.strip() for p in (node.metadata.get("header_path") or "").split("/") if p.strip()]
+    first = node.get_content().strip().splitlines()[0].strip() if node.get_content().strip() else ""
     if first.startswith("#"):
         parts.append(first.lstrip("#").strip())
     return " › ".join(parts)

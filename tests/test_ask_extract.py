@@ -96,6 +96,11 @@ def test_section_adds_the_chunk_own_heading():
     assert ask_mod._section(n) == "Quy định nghỉ phép › Đăng ký nghỉ"
 
 
+def test_section_ignores_windows_line_endings():
+    n = SimpleNamespace(metadata={"header_path": "/Quy định nghỉ phép\r/"}, get_content=lambda: "## Đăng ký nghỉ\r\n\r\n- Nghỉ 1 ngày ...")
+    assert ask_mod._section(n) == "Quy định nghỉ phép › Đăng ký nghỉ"
+
+
 def test_live_answer_is_recorded_then_replayed_without_a_client(isolated, monkeypatch):
     ask_mod.ask("Chiết khấu 20% ai duyệt?", fake_client(message("Cần Trưởng phòng Kinh doanh duyệt.", [CITE])))
 
