@@ -66,7 +66,7 @@ Khi chỉ dùng vector, hai câu trượt:
 
 Thêm BM25 thì bắt được từ khóa "chiết khấu", nên tìm đủ cả hai.
 
-**Hỏi đáp và trích xuất:** xem `results/latest.md` sau khi chạy `python -m rag_erp eval`.
+**Hỏi đáp và trích xuất:** chưa đo, sẽ cập nhật ở đây. Khi chạy `python -m rag_erp eval`, bảng kết quả được ghi vào `results/latest.md`, gồm tỉ lệ trả lời đúng, từ chối đúng, có trích dẫn, độ đúng từng trường của báo giá, độ trễ và chi phí.
 
 ## Kiểm tra báo giá bắt được gì
 
