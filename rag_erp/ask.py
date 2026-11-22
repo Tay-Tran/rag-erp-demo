@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 import anthropic
 
-from . import config, store, usage
+from . import config, replay, store, usage
 from .prompts import ANSWER
 
 
@@ -37,9 +37,13 @@ class Answer:
     usage: usage.CallUsage | None = None
 
 
-def _section(metadata: dict) -> str:
-    path = (metadata.get("header_path") or "").strip("/")
-    return path.replace("/", " › ")
+def _section(node) -> str:
+    """Đường dẫn đề mục: các đề mục cha (header_path của LlamaIndex) cộng đề mục của chính đoạn."""
+    parts = [p for p in (node.metadata.get("header_path") or "").split("/") if p]
+    first = node.get_content().lstrip().splitlines()[0] if node.get_content().strip() else ""
+    if first.startswith("#"):
+        parts.append(first.lstrip("#").strip())
+    return " › ".join(parts)
 
 
 def retrieve(question: str, top_k: int | None = None) -> list:
@@ -52,9 +56,10 @@ def retrieve(question: str, top_k: int | None = None) -> list:
 
 
 def ask(question: str, client: anthropic.Anthropic | None = None, top_k: int | None = None) -> Answer:
-    client = client or anthropic.Anthropic()
+    """Không có khóa API thì phát lại bản ghi (Answer.usage.replayed_from có ngày ghi),
+    hoặc ném replay.NoRecording nếu câu hỏi chưa từng được chạy thật."""
     hits = retrieve(question, top_k)
-    sources = [Source(h.node.metadata.get("file_name", "?"), _section(h.node.metadata), float(h.score or 0)) for h in hits]
+    sources = [Source(h.node.metadata.get("file_name", "?"), _section(h.node), float(h.score or 0)) for h in hits]
 
     documents = [
         {
@@ -66,15 +71,23 @@ def ask(question: str, client: anthropic.Anthropic | None = None, top_k: int | N
         for h, s in zip(hits, sources)
     ]
 
-    started = time.perf_counter()
-    response = client.messages.create(
-        model=config.LLM_MODEL,
-        max_tokens=4000,
-        system=ANSWER.system,
-        output_config={"effort": "low"},
-        messages=[{"role": "user", "content": [*documents, {"type": "text", "text": question}]}],
-    )
-    used = usage.record("answer", ANSWER.version, config.LLM_MODEL, response.usage, started)
+    key = replay.record_key("answer", ANSWER.version, config.LLM_MODEL, {"question": question, "documents": documents})
+    if replay.mode() == "replay":
+        rec = replay.load("answer", key, question)
+        response = rec.message
+        used = usage.from_recording("answer", ANSWER.version, rec.model, response.usage, rec.latency_ms, rec.recorded_at)
+    else:
+        client = client or anthropic.Anthropic()
+        started = time.perf_counter()
+        response = client.messages.create(
+            model=config.LLM_MODEL,
+            max_tokens=4000,
+            system=ANSWER.system,
+            output_config={"effort": "low"},
+            messages=[{"role": "user", "content": [*documents, {"type": "text", "text": question}]}],
+        )
+        used = usage.record("answer", ANSWER.version, config.LLM_MODEL, response.usage, started)
+        replay.save("answer", key, question, config.LLM_MODEL, response, used.latency_ms)
 
     if response.stop_reason == "refusal":
         return Answer("Yêu cầu bị từ chối.", sources, usage=used)

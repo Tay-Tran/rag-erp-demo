@@ -6,7 +6,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import config
+from . import config, replay
+
+
+def _usage_line(u) -> str:
+    base = f"{u.model} · {u.prompt_version} · {u.input_tokens}+{u.output_tokens} token · ${u.cost_usd:.5f} · {u.latency_ms} ms"
+    return f"phát lại, không tốn tiền; số liệu của lần chạy thật lúc ghi: {base}" if u.replayed_from else base
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -39,9 +44,18 @@ def _run(args: argparse.Namespace) -> int:
         print(f"Đã nạp {stats['documents']} tài liệu thành {stats['chunks']} đoạn vào Qdrant ({config.QDRANT_PATH}).")
 
     elif args.cmd == "ask":
-        from .ask import ask
+        from .ask import _section, ask, retrieve
 
-        a = ask(args.question)
+        try:
+            a = ask(args.question)
+        except replay.NoRecording as e:
+            print(replay.missing_message(e.kind))
+            print("\nPhần tìm tài liệu vẫn chạy thật trên máy. Các đoạn liên quan nhất tìm được:")
+            for h in retrieve(args.question):
+                print(f"  - {h.node.metadata.get('file_name')} › {_section(h.node)}")
+            return 1
+        if a.usage and a.usage.replayed_from:
+            print(replay.banner(a.usage.replayed_from, a.usage.model) + "\n")
         print(a.text)
         if a.citations:
             print("\nTrích dẫn:")
@@ -52,13 +66,19 @@ def _run(args: argparse.Namespace) -> int:
                     seen.add(key)
                     print(f"  - {c.file} › {c.section}: \"{c.cited_text}\"")
         if a.usage:
-            print(f"\n[{a.usage.model} · {a.usage.prompt_version} · {a.usage.input_tokens}+{a.usage.output_tokens} token · ${a.usage.cost_usd:.5f} · {a.usage.latency_ms} ms]")
+            print(f"\n[{_usage_line(a.usage)}]")
 
     elif args.cmd == "extract":
         from .extract import trich_xuat
 
         path = args.file if args.file.exists() else config.VOUCHERS_DIR / args.file
-        kq = trich_xuat(path)
+        try:
+            kq = trich_xuat(path)
+        except replay.NoRecording as e:
+            print(replay.missing_message(e.kind))
+            return 1
+        if kq.usage.replayed_from:
+            print(replay.banner(kq.usage.replayed_from, kq.usage.model) + "\n")
         print(kq.bao_gia.model_dump_json(indent=2))
         if kq.van_de:
             print("\nVấn đề phát hiện:")
@@ -66,7 +86,7 @@ def _run(args: argparse.Namespace) -> int:
                 print(f"  [{'LỖI' if v.muc == 'loi' else 'CẢNH BÁO'}] {v.mo_ta}")
         else:
             print("\nKhông phát hiện vấn đề.")
-        print(f"\n[{kq.usage.model} · {kq.usage.prompt_version} · ${kq.usage.cost_usd:.5f} · {kq.usage.latency_ms} ms]")
+        print(f"\n[{_usage_line(kq.usage)}]")
 
     elif args.cmd == "eval":
         from .evaluate import eval_retrieval, run

@@ -18,6 +18,13 @@ class CallUsage:
     output_tokens: int
     cost_usd: float
     latency_ms: int
+    replayed_from: str | None = None  # ngày ghi (YYYY-MM-DD) khi đây là câu trả lời phát lại
+
+
+def from_recording(kind: str, prompt_version: str, model: str, usage, latency_ms: int, recorded_at: str) -> CallUsage:
+    """Số liệu của lần chạy thật lúc ghi; không ghi vào nhật ký vì lần này không gọi API."""
+    return CallUsage(kind, prompt_version, model, usage.input_tokens, usage.output_tokens,
+                     cost_usd(model, usage.input_tokens, usage.output_tokens), latency_ms, recorded_at)
 
 
 def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:

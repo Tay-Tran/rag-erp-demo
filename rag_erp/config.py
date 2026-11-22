@@ -16,6 +16,7 @@ EVAL_DIR = ROOT / "data" / "eval"
 STORAGE_DIR = ROOT / "storage"
 QDRANT_PATH = STORAGE_DIR / "qdrant"
 RESULTS_DIR = ROOT / "results"
+REPLAY_DIR = ROOT / "data" / "replay"
 USAGE_LOG = STORAGE_DIR / "usage.jsonl"
 
 # Tìm kiếm kết hợp: vector ngữ nghĩa (dense) + từ khóa BM25 (sparse). Tắt bằng RAG_HYBRID=0.

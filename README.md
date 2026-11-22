@@ -19,8 +19,24 @@ python -m rag_erp ask "Muốn chiết khấu 20% cho khách thì cần ai duyệ
 python -m rag_erp extract BG-2026-0157.txt                 # trích xuất + kiểm tra báo giá
 python -m rag_erp eval                                     # bộ đo đầy đủ
 python -m rag_erp eval --retrieval-only                    # chỉ đo bước tìm kiếm, không tốn tiền
-pytest                                                     # 14 unit test, không gọi API
+pytest                                                     # 20 unit test, không gọi API
 ```
+
+## Chạy thử khi không có khóa API
+
+Không có khóa API của Claude vẫn chạy được demo, nhưng màn hình sẽ nói rõ phần nào chạy thật, phần nào là câu trả lời ghi sẵn:
+
+| Phần | Không có khóa API |
+| --- | --- |
+| Tìm tài liệu liên quan (LlamaIndex, Qdrant, embedding) | Chạy thật trên máy |
+| Kiểm tra lỗi báo giá (tính lại, đối chiếu quy định) | Chạy thật trên máy |
+| Câu trả lời của Claude, dữ liệu Claude đọc từ báo giá | Phát lại bản ghi từ một lần chạy thật, ghi kèm ngày và model |
+
+- Mỗi lần chạy có khóa, câu trả lời thật được tự động lưu vào `data/replay/`.
+- Bản ghi chỉ được phát lại khi câu hỏi, các đoạn tài liệu tìm được, prompt và model giống hệt lúc ghi; khác một chữ là không phát lại. Vì vậy demo không bao giờ đưa câu trả lời của câu này cho câu khác.
+- Câu chưa có bản ghi thì demo báo "Chưa có câu trả lời ghi sẵn cho câu hỏi này", liệt kê các câu đã có bản ghi để thử, và vẫn cho xem các đoạn tài liệu tìm được.
+- Kết quả phát lại luôn mở đầu bằng dòng "LƯU Ý: Đây là câu trả lời đã ghi lại từ một lần chạy thật với Claude … ngày …". Chi phí và độ trễ hiện ra là số của lần chạy thật lúc ghi.
+- Muốn ép một chế độ: `RAG_MODE=live` (luôn gọi Claude) hoặc `RAG_MODE=replay` (luôn phát lại).
 
 ## Cách hoạt động
 
@@ -45,6 +61,7 @@ flowchart LR
 | Trích xuất | `rag_erp/extract.py`, `schema.py` | `messages.parse` với schema Pydantic; model chép đúng số trên chứng từ, kể cả số sai |
 | Kiểm tra chứng từ | `rag_erp/checks.py` | Mọi phép tính và đối chiếu quy định làm bằng Python, không để LLM tính, nên lặp lại được và có unit test |
 | Prompt có phiên bản | `rag_erp/prompts.py` | Mỗi prompt có mã phiên bản; mã này đi vào nhật ký chi phí và kết quả đo |
+| Ghi và phát lại | `rag_erp/replay.py` | Lưu câu trả lời thật; không có khóa thì phát lại, có nhãn rõ ràng |
 | Chi phí, độ trễ | `rag_erp/usage.py` | Mỗi lần gọi ghi token, chi phí USD và độ trễ vào `storage/usage.jsonl` |
 | Bộ đo | `rag_erp/evaluate.py`, `data/eval/` | 19 câu trong phạm vi + 2 câu ngoài tài liệu; 2 báo giá có đáp án từng trường và danh sách lỗi cần bắt |
 
